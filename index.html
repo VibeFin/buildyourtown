@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>BuildYourTown</title>
+  <meta name="description" content="BuildYourTown : fondez une ville et faites-la grandir, dans votre navigateur. Build your town and make it grow, right in your browser.">
+  <meta name="theme-color" content="#141a28">
+  <meta property="og:title" content="BuildYourTown">
+  <meta property="og:description" content="Fondez une ville, faites-la grandir. Found a city, make it grow.">
+  <meta property="og:type" content="website">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <canvas id="map"></canvas>
+
+  <header id="topbar">
+    <div class="brand">Build<span>Your</span>T<svg class="hat" viewBox="0.75 1.25 46.5 32" preserveAspectRatio="none" aria-hidden="true"><path d="M5 26 Q5 2 24 2 Q43 2 43 26 Z" fill="#f2c14e" stroke="#8a6a10" stroke-width="1.5"/><rect x="1.5" y="25" width="45" height="7.5" rx="3.75" fill="#e0a93a" stroke="#8a6a10" stroke-width="1.5"/><rect x="21" y="2" width="6" height="23" fill="#ffd97a"/></svg>wn</div>
+    <div class="stat money" data-i18n-title="top.funds"><span class="ico">💰</span><span class="txt"><span id="money" class="val">0 $</span><span id="budget-net" class="sub"></span></span></div>
+    <div class="stat date" data-i18n-title="top.date"><span class="ico">📅</span><span class="txt"><span id="date" class="val">Jan 1900</span></span></div>
+    <div class="stat pop" data-i18n-title="top.pop"><span class="ico">👥</span><span class="txt"><span id="pop" class="val">0</span></span></div>
+    <div class="stat rci" data-i18n-title="top.demand.title">
+      <span class="ico">📈</span>
+      <div class="bars">
+        <div class="bar r"><div class="fill" id="rci-r"></div><span>R</span></div>
+        <div class="bar c"><div class="fill" id="rci-c"></div><span>C</span></div>
+        <div class="bar i"><div class="fill" id="rci-i"></div><span>I</span></div>
+      </div>
+    </div>
+    <div class="stat power" data-i18n-title="top.power.title"><span class="ico">⚡</span><span class="txt"><span id="power" class="val small">0 / 0 MW</span></span></div>
+    <div class="stat water" data-i18n-title="top.water.title"><span class="ico">💧</span><span class="txt"><span id="water" class="val small">0 %</span></span></div>
+    <div class="group menus">
+      <button id="btn-cities" data-i18n-title="btn.cities.title"><span id="city-name" class="name">Ville</span><span class="caret">▾</span></button>
+      <button id="btn-lang" class="lang" title="Switch language / Changer de langue"><span class="flag en"></span><span class="code">EN</span></button>
+      <button id="btn-help" class="help" data-i18n-title="btn.help" title="Aide">?</button>
+    </div>
+    <div id="speed" class="group">
+      <button data-speed="0" data-i18n-title="speed.pause" class="pause"><i></i><i></i></button>
+      <button data-speed="1" data-i18n-title="speed.1"><i class="tri"></i></button>
+      <button data-speed="2" data-i18n-title="speed.2"><i class="tri"></i><i class="tri"></i></button>
+      <button data-speed="3" data-i18n-title="speed.3"><i class="tri"></i><i class="tri"></i><i class="tri"></i></button>
+    </div>
+  </header>
+
+  <nav id="toolbar"></nav>
+  <div id="flyout" hidden></div>
+  <div id="tooltip" hidden></div>
+
+  <aside id="query" hidden>
+    <div class="head"><span id="query-title"></span><button id="query-close" class="ghost">✕</button></div>
+    <div id="query-body"></div>
+  </aside>
+
+  <aside id="panel-budget" class="panel" hidden>
+    <div class="head"><span data-i18n="budget.title">Budget mensuel</span><button class="ghost close">✕</button></div>
+    <div id="budget-body" class="body"></div>
+  </aside>
+
+  <div id="maps-menu" class="menu" hidden></div>
+  <div id="demand-pop" class="menu" hidden></div>
+
+  <aside id="panel-journal" class="panel" hidden>
+    <div class="head"><span data-i18n="journal.title">Journal de la ville</span><button class="ghost close">✕</button></div>
+    <div class="body">
+      <h3 data-i18n="journal.pop">Population, 10 dernières années</h3>
+      <canvas id="chart-pop" width="316" height="70"></canvas>
+      <h3 data-i18n="journal.money">Fonds, 10 dernières années</h3>
+      <canvas id="chart-money" width="316" height="70"></canvas>
+      <h3 data-i18n="journal.advice">Conseils</h3>
+      <ul id="journal-advice" class="advice"></ul>
+      <h3 data-i18n="journal.events">Événements</h3>
+      <div id="journal-log" class="log"></div>
+    </div>
+  </aside>
+
+  <aside id="panel-cities" class="panel" hidden>
+    <div class="head"><span data-i18n="cities.title">Villes</span><button class="ghost close">✕</button></div>
+    <div class="body">
+      <div id="cities-list"></div>
+      <button id="cities-new" class="primary" data-i18n="cities.new">Nouvelle ville</button>
+    </div>
+  </aside>
+
+  <div id="bankrupt" class="modal" hidden>
+    <div class="tutorial bankrupt" role="dialog" aria-modal="true">
+      <div class="head"><h2 data-i18n="bankrupt.title">Faillite</h2></div>
+      <div class="body"><p id="bankrupt-text"></p></div>
+      <div class="foot actions">
+        <button id="bankrupt-rescue" type="button" class="primary" data-i18n="bankrupt.rescue">Reprendre avant la crise</button>
+        <button id="bankrupt-load" type="button" data-i18n="bankrupt.load">Mes villes</button>
+        <button id="bankrupt-new" type="button" data-i18n="bankrupt.new">Nouvelle ville</button>
+      </div>
+    </div>
+  </div>
+  <div id="help" class="modal" hidden>
+    <div class="tutorial" role="dialog" aria-modal="true">
+      <div class="head"><h2 id="help-title"></h2><button id="help-close" type="button" aria-label="Fermer">✕</button></div>
+      <div class="body"><div id="help-pic" class="pic"></div><ul id="help-list"></ul></div>
+      <div class="foot"><span class="dots"><span id="help-dots"></span><span id="help-step" class="step"></span></span><span class="nav"><button id="help-prev" type="button" data-i18n="tuto.prev">Précédent</button><button id="help-next" type="button" class="primary" data-i18n="tuto.next">Suivant</button></span></div>
+    </div>
+  </div>
+  <div id="welcome" class="modal" hidden>
+    <form id="welcome-form" class="welcome">
+      <div class="hero">
+        <div class="logo">Build<span>Your</span>T<svg class="hat" viewBox="0.75 1.25 46.5 32" preserveAspectRatio="none" aria-hidden="true"><path d="M5 26 Q5 2 24 2 Q43 2 43 26 Z" fill="#f2c14e" stroke="#8a6a10" stroke-width="1.5"/><rect x="1.5" y="25" width="45" height="7.5" rx="3.75" fill="#e0a93a" stroke="#8a6a10" stroke-width="1.5"/><rect x="21" y="2" width="6" height="23" fill="#ffd97a"/></svg>wn</div>
+        <p class="tagline" data-i18n="welcome.tagline">Fondez une ville, faites-la grandir.</p>
+        <div id="welcome-lang" class="langs"><span class="lbl" data-i18n="welcome.lang">Langue</span>
+          <button type="button" data-lang="fr"><span class="flag fr"></span>Français</button><button type="button" data-lang="en"><span class="flag en"></span>English</button>
+        </div>
+        <span class="credits"><span data-i18n="credits">Réalisé par Erwann avec Claude Fable 5.1</span> · <a class="link-linkedin" href="https://www.linkedin.com/in/erwann-maignan/" target="_blank" rel="noopener">LinkedIn</a> · <a class="link-github" href="https://github.com/Rapsody09/buildyourtown" target="_blank" rel="noopener">GitHub</a></span>
+      </div>
+      <div class="fields">
+        <label class="field"><span class="lbl" data-i18n="welcome.name">Nom de la ville</span><input id="welcome-name" type="text" maxlength="40" data-i18n-ph="welcome.namePh" autocomplete="off"></label>
+        <div class="field">
+          <span class="lbl" data-i18n="welcome.difficulty">Difficulté</span>
+          <div class="diff-slider">
+            <input id="welcome-diff" type="range" min="0" max="2" step="1" value="0">
+            <div id="welcome-difficulty" class="diff-labels"></div>
+          </div>
+        </div>
+        <div class="field">
+          <span class="lbl" data-i18n="welcome.map">Carte</span>
+          <div id="welcome-maps" class="cards maps"></div>
+          <button type="button" id="welcome-more" class="ghost small" data-i18n="welcome.more">Autres cartes</button>
+        </div>
+        <div class="actions">
+          <button type="button" id="welcome-cancel" class="ghost" data-i18n="welcome.cancel">Annuler</button>
+          <button type="submit" class="primary big" data-i18n="welcome.found">Fonder la ville</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div id="toast" hidden></div>
+  <div id="minimap"><div class="head"><span id="minimap-name" data-i18n="minimap.title">Carte</span><button id="minimap-flat" type="button" data-i18n-title="btn.flat" title="Vue à plat"><svg viewBox="0 0 32 20" aria-hidden="true"><path d="M16.0 3.6 21.9 6.5 16.0 9.4 10.1 6.5Z" fill="currentColor"/><path d="M23.0 7.1 28.9 10.0 23.0 12.9 17.1 10.0Z" fill="currentColor" opacity="0.8"/><path d="M9.0 7.1 14.9 10.0 9.0 12.9 3.1 10.0Z" fill="currentColor" opacity="0.8"/><path d="M16.0 10.6 21.9 13.5 16.0 16.4 10.1 13.5Z" fill="currentColor"/></svg></button><button id="minimap-maps" type="button" data-i18n-title="btn.maps" title="Cartes">🗺️</button></div><canvas id="minimap-canvas" width="256" height="128" data-i18n-title="minimap" title="Carte : appuyez pour vous y rendre"></canvas></div>
+  <footer id="statusbar">
+    <span class="left"><span id="version" class="version"></span><span id="date-mobile" class="version"></span><span id="status"></span><button id="tool-pill" type="button" hidden><span class="txt"></span><span class="x">✕</span></button></span>
+    <span class="right"><span id="legend"></span><span id="preview" hidden></span><span class="credits"><span data-i18n="credits">Réalisé par Erwann avec Claude Fable 5.1</span> · <a class="link-linkedin" href="https://www.linkedin.com/in/erwann-maignan/" target="_blank" rel="noopener">LinkedIn</a> · <a class="link-github" href="https://github.com/Rapsody09/buildyourtown" target="_blank" rel="noopener">GitHub</a></span></span>
+  </footer>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

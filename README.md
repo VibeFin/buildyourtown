@@ -1,21 +1,186 @@
-# buildyourtown
+# BuildYourTown
 
-Prepare the selected source snapshot in GitHub Actions.
+**Un city-builder isométrique qui tourne entièrement dans le navigateur.**
+Fondez une ville, tracez routes et rails, zonez, alimentez en électricité et
+en eau, gérez budget, services, trafic, catastrophes, et regardez-la grandir.
+Français et anglais. Aucune installation, aucun compte, aucune donnée envoyée
+à un serveur : la partie est sauvegardée dans votre navigateur.
 
-<!-- omgithub:readme:start -->
-## 🚀 Build, play, and remix with OMGithub
+*An isometric city-builder that runs entirely in the browser, in French and
+English. No install, no account, saves stay in your browser. To play:
+[buildyourtown.com](https://buildyourtown.com). To run it yourself, see
+« Lancer chez soi » below.*
 
-**Remixed using [OMGithub.com](https://omgithub.com).**
+Version 0.7.0 · [Jouer en ligne](https://buildyourtown.com) · Réalisé par
+Erwann avec Claude Fable 5.1
 
-[![OMGithub](https://img.shields.io/badge/OMGithub-Open%20project-orange?style=for-the-badge)](https://omgithub.com/VibeFin/buildyourtown)
-[![GitHub](https://img.shields.io/badge/GitHub-Source-181717?logo=github&style=for-the-badge)](https://github.com/VibeFin/buildyourtown)
+![Vue d'ensemble d'une ville](docs/screenshots/overview.png)
 
-- 🎮 [Open the project](https://omgithub.com/VibeFin/buildyourtown).
-- ✨ [Remix this project](https://omgithub.com/?remix=VibeFin%2Fbuildyourtown).
-- 💻 [Explore the source](https://github.com/VibeFin/buildyourtown).
-- 🛠️ [Check build runs](https://github.com/VibeFin/buildyourtown/actions).
-- 🐛 [Report an issue](https://github.com/VibeFin/buildyourtown/issues).
-- 👤 [Explore the creator's projects](https://omgithub.com/VibeFin).
-- 🌍 [Create with OMGithub](https://omgithub.com).
-- 🧬 [Explore the remix source](https://github.com/rapsody09/buildyourtown/tree/d12a19973a331e392ac8db80cedb9ec0e18c1444).
-<!-- omgithub:readme:end -->
+## En bref
+
+- Carte isométrique de 128 × 128 cases, en cinq familles au choix : côte,
+  rivière à méandres, lacs, archipel, montagne. Rives sableuses, eau qui fonce au
+  large, relief en terrasses qui sèche avec l'altitude, forêts en bosquets ;
+  terraformage à la main.
+- Zones résidentielles, commerciales et industrielles qui se développent
+  seules sur cinq niveaux de densité, et fusionnent en immeubles 2 × 2 puis
+  3 × 3 quand le quartier s'y prête.
+- Réseaux : routes, ponts, lignes haute tension, voie ferrée et gares,
+  autoroutes, dépôts de bus, port, aéroport. Le rail traverse les routes par
+  des passages à niveau, franchit les autoroutes sur un pont, en ligne
+  droite seulement, et l'eau sur des chevalets ; sur un pont, ni croisement
+  ni embranchement.
+- Énergie (éolien à terre ou en mer, charbon, gaz, nucléaire, fusion), eau,
+  police, pompiers, écoles, hôpitaux, parcs, récompenses de maire dont
+  l'arcologie. Les équipements lourds se débloquent avec la population :
+  dépôt de bus et grand parc à 1 000 habitants, hôpital et centrale à gaz à
+  2 500, rail et gare à 5 000, autoroute et port à 10 000, aéroport et
+  nucléaire à 20 000, fusion à 100 000. Un séisme proche peut faire céder une
+  centrale nucléaire.
+- Simulation mensuelle : demande, valeur foncière, pollution, criminalité,
+  trajets domicile-emploi et embouteillages, budget détaillé, emprunts,
+  arrêtés municipaux, trois niveaux de difficulté.
+- Catastrophes : incendies qui se propagent, inondations, tornades, séismes.
+- Une ville vivante : voitures, trains, cargo et voiliers, avion, fumées
+  d'usines, éoliennes qui tournent, grues sur les chantiers, feux aux
+  carrefours et barrières de passage à niveau.
+- Journal avec courbes, conseils et historique ; cartes de données
+  (pollution, trafic, foncier, couverture des services…).
+
+| | |
+|---|---|
+| ![Gros plan sur le centre-ville](docs/screenshots/closeup.png) | ![Écran d'accueil](docs/screenshots/welcome.png) |
+| ![Panneau budget](docs/screenshots/budget.png) | ![Carte du trafic](docs/screenshots/traffic.png) |
+
+## Lancer chez soi
+
+Il n'y a rien à installer sur la machine à part Docker. Le jeu est un site
+statique servi par nginx.
+
+```sh
+git clone https://github.com/Rapsody09/buildyourtown.git
+cd buildyourtown
+docker build -t buildyourtown .
+docker run --rm -p 8080:8080 buildyourtown
+```
+
+Puis ouvrir http://localhost:8080. L'image fait environ 20 Mo, tourne sans
+privilèges (port 8080, utilisateur non root) et expose `/healthz` pour les
+sondes. Elle porte la version en label OCI (`org.opencontainers.image.version`).
+
+Avec `make` : `make prod-image` construit l'image, `make prod-run` la lance
+sur http://localhost:8081.
+
+## Jouer
+
+Commencez par une centrale, quelques routes, puis des zones de part et
+d'autre. Les zones ne se développent que si elles ont une route à moins de
+trois cases, du courant, et des emplois ou des habitants à portée de trajet.
+
+| Touche | Action |
+|---|---|
+| R / C / I | zones résidentielle, commerciale, industrielle |
+| T | route (glisser, tracé en L ; sur l'eau, devient un pont) |
+| L | ligne haute tension |
+| N | niveler le terrain (glisser un rectangle) |
+| B | bulldozer |
+| Q | informations sur une case |
+| V | vue à plat : immeubles en emprise au sol, pour atteindre une case cachée |
+| P, 1, 2, 3 | pause, vitesses |
+| Échap | aucun outil, fermer les panneaux |
+
+Clic droit, molette-clic, espace + glisser ou flèches : déplacer la vue.
+Molette : zoom. La barre de gauche donne accès à tous les outils, avec le
+nom, le coût et la touche au survol. Le groupe Transport réunit routes, rails,
+autoroutes et équipements ; Énergie, Eau et Services ouvrent la liste de leurs
+bâtiments ; Parcs contient aussi les monuments à débloquer ; le groupe
+Bulldozer réunit la démolition et les outils de relief. La loupe, en tête de
+barre, est le mode par défaut : un clic renseigne sur une case. Les événements
+marquants (catastrophes, paliers de population et déblocages, compte à rebours
+de faillite) s'affichent en surimpression sur la carte ; cliquer sur un message
+de catastrophe centre la vue dessus.
+
+**Sur mobile ou tablette**, la barre d'outils passe en bas de l'écran et les
+panneaux s'ouvrent en volets. Un doigt déplace la vue ; deux doigts zooment.
+Un appui long pose un bâtiment, qui suit le doigt jusqu'au relâchement, ou
+trace une route, une zone ou une ligne en glissant. Un appui bref renseigne
+sur une case avec la loupe, ou montre l'aperçu d'un bâtiment qu'un second appui
+confirme. La mini-carte en bas à droite montre où l'on se trouve : appuyer
+dessus déplace la vue, et son bouton ouvre les cartes de données. Dans le
+bandeau, les fonds ouvrent le budget, la population le journal et la date les
+commandes de vitesse.
+
+### Ce qui fait vivre la ville
+
+- **Électricité** : le courant se propage de proche en proche entre zones,
+  bâtiments et lignes, et traverse une route d'une case. Si la consommation
+  dépasse la capacité, les quartiers les plus éloignés des centrales sont
+  coupés.
+- **Eau** : pompes au bord de l'eau et châteaux d'eau alimentent un rayon.
+  Sans eau, une zone plafonne en faible densité.
+- **Valeur foncière** : montée par l'eau, les forêts, les parcs et les
+  services, plombée par la pollution, la criminalité et les bouchons. Elle
+  plafonne la densité et module les recettes.
+- **Trajets** : chaque mois, les habitants rejoignent les emplois les plus
+  proches par le réseau ; les navetteurs se cumulent sur chaque case de route.
+  Au-delà de la capacité, la case sature, coûte plus cher à traverser et
+  pollue. Gares, bus et autoroutes soulagent les axes.
+- **Budget** : impôts par type de zone, dépenses par poste, financement de
+  chaque service, emprunts. La difficulté module la demande, les coûts, la
+  fréquence des catastrophes et le taux des emprunts.
+- **Faillite** : six mois d'affilée sous le seuil de la difficulté (−10 000 $ en
+  facile, −5 000 $ en moyen, 0 $ en difficile) et le conseil municipal vous
+  démet. On peut alors reprendre la partie à la dernière période saine, grâce
+  à une photo prise tous les six mois tant que les comptes tiennent, ou fonder
+  une autre ville.
+- **Catastrophes** : aléatoires, plus fréquentes en difficile. Ce qui brûle
+  ou s'écroule laisse des décombres à déblayer ; une zone privée de courant
+  ou d'accès se vide lentement, le temps de réparer.
+
+### Langues
+
+Français ou anglais : détection du navigateur au premier lancement, bouton
+dans le bandeau, choix sur l'écran d'accueil. `?lang=fr` ou `?lang=en` dans
+l'adresse force la langue.
+
+## Développement
+
+Tout l'outillage tourne dans un conteneur, rien n'est installé sur la machine.
+
+```sh
+make image      # construit l'image de dev (node + vite)
+make dev        # serveur de dev avec rechargement à chaud : http://localhost:5173
+make build      # typecheck + build de production dans dist/
+make typecheck
+make simtest ARGS="30 12345 7 mixed moyen"   # simulation headless : années, graine, impôts, scénario, difficulté
+make screenshots # régénère les captures de ce README depuis l'image de production
+```
+
+Adresses utiles en dev : `http://localhost:5173/?demo=10` ouvre une ville de
+démonstration simulée sur dix ans ; options `&showcase`, `&zoom=1`,
+`&map=traffic`, `&panel=budget`, `&panel=journal`, `&disaster=fire`,
+`&welcome`.
+
+Pile : TypeScript, Vite, canvas 2D, aucune dépendance à l'exécution. Les
+sprites sont dessinés à la volée (formes isométriques, palettes variées,
+quatre silhouettes par bâtiment), donc aucun fichier image dans le jeu.
+
+```
+src/game/    état de la ville, terrain, simulation, outils, bâtiments
+src/render/  sprites procéduraux, icônes, rendu isométrique
+src/ui/      souris / clavier, interface, écran d'accueil, aperçus de cartes
+src/i18n.ts  dictionnaire français / anglais
+scripts/     simtest.ts, test d'équilibrage headless
+nginx/       configuration de l'image de production
+```
+
+La version vit dans `package.json` : elle s'affiche en bas du jeu et est
+posée sur l'image Docker. `scripts/release.sh patch|minor|major` publie une
+version : bump, README, notes de version (`CHANGELOG.md`), commit et tag,
+image et déploiement.
+
+## Crédits
+
+Réalisé par Erwann avec Claude Fable 5.1.
+[LinkedIn](https://www.linkedin.com/in/erwann-maignan/) ·
+[buildyourtown.com](https://buildyourtown.com)
