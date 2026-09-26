@@ -20,11 +20,15 @@
   color: var(--text);
 }
 
-* { box-sizing: border-box; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); touch-action: manipulation; overscroll-behavior: none; }
+html, body { margin: 0; height: 100%; height: 100dvh; overflow: hidden; background: var(--bg); touch-action: manipulation; overscroll-behavior: none; -webkit-text-size-adjust: 100%; }
 
-#map { position: fixed; inset: 0; width: 100%; height: 100%; display: block; cursor: crosshair; }
+#map { position: fixed; inset: 0; width: 100%; height: 100%; display: block; cursor: crosshair; -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; }
+
+/* game chrome is tapped, not selected: no callout, no selection, no tap delay */
+#topbar, #toolbar, #flyout, #minimap, #statusbar, button { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+button, #tool-pill, .menu button.item, #flyout button.item { touch-action: manipulation; }
 
 /* ---- top bar ---- */
 #topbar {
@@ -141,8 +145,10 @@ input[type="text"]:focus { outline: 2px solid var(--accent); border-color: trans
   top: 64px; left: 10px;
   width: 176px;
   max-height: calc(100vh - 104px);
+  max-height: calc(100dvh - 104px);
   overflow-y: auto;
   overflow-x: hidden;
+  overscroll-behavior: contain;
   display: grid;
   grid-template-columns: repeat(2, 78px);
   justify-content: center;
@@ -190,9 +196,9 @@ input[type="text"]:focus { outline: 2px solid var(--accent); border-color: trans
 }
 #minimap .head { display: flex; justify-content: space-between; align-items: center; height: 22px; padding: 0 2px 2px 6px; font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
 #minimap .head { gap: 4px; }
-#minimap .head button { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 20px; padding: 0; font-size: 13px; line-height: 1; border-radius: 6px; }
+#minimap .head button { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 28px; padding: 0 4px; font-size: 13px; line-height: 1; border-radius: 6px; }
 #minimap .head button svg { display: block; width: 22px; height: 14px; }
-#minimap canvas { display: block; width: 100%; height: calc(100% - 22px); image-rendering: pixelated; border-radius: 6px; }
+#minimap canvas { display: block; width: 100%; height: calc(100% - 22px); image-rendering: pixelated; border-radius: 6px; touch-action: none; }
 .menu.near-minimap { left: auto; right: 12px; }
 /* figures that open something */
 .stat.money, .stat.date, .stat.pop { cursor: pointer; }
@@ -265,9 +271,9 @@ input[type="text"]:focus { outline: 2px solid var(--accent); border-color: trans
 #query .head button, .panel .head button { padding: 0 7px; }
 #query-body { color: var(--muted); font-weight: 600; }
 
-.panel { width: 360px; max-height: calc(100vh - 104px); display: flex; flex-direction: column; }
+.panel { width: 360px; max-height: calc(100vh - 104px); max-height: calc(100dvh - 104px); display: flex; flex-direction: column; }
 /* the saves panel sits in the middle of the screen, on every screen size */
-#panel-cities { left: 50%; top: 50%; right: auto; transform: translate(-50%, -50%); width: min(420px, 92vw); max-height: 80vh; z-index: 6; }
+#panel-cities { left: 50%; top: 50%; right: auto; transform: translate(-50%, -50%); width: min(420px, 92vw); max-height: 80vh; max-height: 80dvh; z-index: 6; }
 .panel .head { padding: 10px 14px; border-bottom: 1px solid var(--border); }
 .panel .body { padding: 8px 14px 14px; overflow-y: auto; scrollbar-width: thin; }
 .panel h3 { margin: 12px 0 4px; font-family: var(--font-head); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
@@ -343,7 +349,7 @@ input[type="text"]:focus { outline: 2px solid var(--accent); border-color: trans
 /* ---- tutorial ---- */
 #btn-help { font-family: var(--font-head); font-weight: 800; font-size: 18px; width: 42px; padding: 0; color: var(--accent); }
 .tutorial {
-  width: min(560px, 92vw); max-height: 86vh;
+  width: min(560px, 92vw); max-height: 86vh; max-height: 86dvh;
   display: flex; flex-direction: column;
   background: var(--panel); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow);
 }
@@ -376,6 +382,7 @@ input[type="text"]:focus { outline: 2px solid var(--accent); border-color: trans
 .welcome {
   width: min(880px, 94vw);
   max-height: 92vh;
+  max-height: 92dvh;
   display: grid;
   grid-template-columns: 280px 1fr;
   background: var(--panel);
@@ -501,17 +508,20 @@ input[type="text"]:focus { outline: 2px solid var(--accent); border-color: trans
     width: auto; max-height: none;
     display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 4px;
     overflow-x: auto; overflow-y: hidden;
-    padding: 5px 6px;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 5px 6px calc(5px + env(safe-area-inset-bottom));
     border-radius: 0;
     border-left: 0; border-right: 0;
     scroll-snap-type: x proximity;
   }
+  #toolbar::-webkit-scrollbar { display: none; }
   #toolbar hr { width: 1px; height: 40px; margin: 0 3px; border-top: 0; border-left: 1px solid var(--border); flex: none; }
-  #toolbar button.tool, #toolbar button.menu-btn { width: 50px; height: 50px; scroll-snap-align: start; }
+  #toolbar button.tool, #toolbar button.menu-btn { width: 52px; height: 52px; scroll-snap-align: start; flex: none; }
   #toolbar button.menu-btn { font-size: 22px; }
   #toolbar button.tool .ico { width: 44px; height: 44px; }
   #toolbar button.tool .ico canvas { width: 44px; height: 44px; }
-  #minimap { right: 6px; bottom: calc(96px + env(safe-area-inset-bottom)); width: 140px; height: 92px; padding: 3px; }
+  #minimap { right: 6px; bottom: calc(102px + env(safe-area-inset-bottom)); width: 148px; height: 100px; padding: 3px; }
   /* speed buttons live behind the date: tap it to show them */
   #speed { display: none; }
   #speed.show {
@@ -528,31 +538,37 @@ input[type="text"]:focus { outline: 2px solid var(--accent); border-color: trans
     top: auto; left: 0; right: 0; z-index: 6;
     bottom: calc(92px + env(safe-area-inset-bottom));
     width: auto; max-height: 55vh;
+    max-height: 55dvh;
     border-radius: 14px 14px 0 0;
     border-bottom: 0;
     overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
   }
-  #flyout { padding: 8px 10px; }
+  #flyout { padding: 8px 10px calc(8px + env(safe-area-inset-bottom)); }
   #demand-pop { width: auto; }
-  #panel-cities { left: 50%; right: auto; top: 50%; bottom: auto; width: min(420px, 92vw); max-height: 80vh; border-radius: 14px; border-bottom: 1px solid var(--border); }
-  #flyout button.item { padding: 6px 8px 6px 5px; }
-  .panel { max-height: 60vh; }
-  .panel .body { padding: 6px 12px 12px; }
+  #panel-cities { left: 50%; right: auto; top: 50%; bottom: auto; width: min(420px, 92vw); max-height: 80vh; max-height: 80dvh; border-radius: 14px; border-bottom: 1px solid var(--border); }
+  #flyout button.item { padding: 8px 8px 8px 5px; min-height: 56px; }
+  .panel { max-height: 60vh; max-height: 60dvh; }
+  .panel .body { padding: 6px 12px calc(12px + env(safe-area-inset-bottom)); overscroll-behavior: contain; }
   .panel .row .num { min-width: 60px; }
-  input[type="range"] { width: 70px; }
+  .panel .head button, #query .head button { min-width: 36px; min-height: 36px; }
+  input[type="range"] { width: 70px; height: 28px; }
+  .panel input[type="range"] { width: 96px; }
 
   #statusbar { height: 30px; padding: 0 8px; padding-bottom: env(safe-area-inset-bottom); font-size: 11px; }
   #statusbar .credits, #legend { display: none; }
   #status { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   #tool-pill {
     display: inline-flex; align-items: center; gap: 8px;
-    padding: 2px 4px 2px 9px; border-radius: 12px;
+    min-height: 34px;
+    padding: 4px 4px 4px 10px; border-radius: 17px;
     font: inherit; font-weight: 700; color: #1d1405;
     background: linear-gradient(180deg, #ffcf5c 0%, var(--accent) 100%);
     border: 0; box-shadow: 0 0 0 1px var(--accent-dark);
     white-space: nowrap;
   }
-  #tool-pill .x { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: rgba(0,0,0,0.25); color: #fff; font-size: 11px; }
+  #tool-pill .x { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: rgba(0,0,0,0.25); color: #fff; font-size: 13px; }
   #statusbar .left:has(#tool-pill:not([hidden])) #status { display: none; }
 
   /* welcome: one column, scrollable */
@@ -581,4 +597,14 @@ input[type="text"]:focus { outline: 2px solid var(--accent); border-color: trans
   .stat.date { display: none; }
   #date-mobile { display: inline-block; }
   #version { display: none; }
+}
+
+/* iOS Safari zooms the page when a <16px input gets focus: keep city naming at 16px */
+@media (max-width: 900px) {
+  input[type="text"] { font-size: 16px; }
+}
+
+/* touch screens have no hover: a tap must not leave a button stuck brightened */
+@media (hover: none) {
+  button:hover { filter: none; }
 }

@@ -6,4 +6,6 @@ const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 
 export default defineConfig({
   // exposed to the app as __APP_VERSION__ (shown in the status bar)
   define: { __APP_VERSION__: JSON.stringify(pkg.version) },
+  // the public preview reaches the server through a tunnel hostname
+  preview: { allowedHosts: true },
 });

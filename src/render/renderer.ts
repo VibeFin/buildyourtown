@@ -71,8 +71,9 @@ export class Renderer {
   }
 
   resize(): void {
-    // phones report 3x pixel ratios: capping at 2 keeps the canvas affordable
-    this.dpr = Math.min(2, window.devicePixelRatio || 1);
+    // phones report 3x pixel ratios and weak GPUs: cap coarse pointers lower
+    const coarse = typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
+    this.dpr = Math.min(coarse ? 1.5 : 2, window.devicePixelRatio || 1);
     this.width = this.canvas.clientWidth;
     this.height = this.canvas.clientHeight;
     this.canvas.width = Math.round(this.width * this.dpr);

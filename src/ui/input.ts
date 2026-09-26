@@ -48,7 +48,8 @@ export function attachInput(canvas: HTMLCanvasElement, renderer: Renderer, h: In
   // the canvas box without any transform: getBoundingClientRect() moves with the gesture transforms
   let baseRect = canvas.getBoundingClientRect();
   // one finger: idle until it moves (pan) or is held (draw with the tool); a short tap uses the tool once
-  const HOLD_MS = 280, SLOP = 8, PAN_COMMIT_MS = 80, PAN_COMMIT_PX = 48;
+  // SLOP is in CSS px: a finger covers ~10px, so anything below that is still a tap
+  const HOLD_MS = 280, SLOP = 10, PAN_COMMIT_MS = 80, PAN_COMMIT_PX = 48;
   let touchMode: 'idle' | 'pan' | 'draw' = 'idle';
   let touchStart: Pt | null = null;
   let touchId = -1;
@@ -69,6 +70,11 @@ export function attachInput(canvas: HTMLCanvasElement, renderer: Renderer, h: In
   };
 
   canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+  // iOS Safari: no page pinch-zoom or double-tap zoom starting from the map
+  canvas.addEventListener('gesturestart', (e) => e.preventDefault());
+  document.addEventListener('dblclick', (e) => {
+    if ((e.target as HTMLElement | null)?.closest?.('#map')) e.preventDefault();
+  }, { passive: false });
 
   const startPan = (e: PointerEvent) => {
     panning = true;

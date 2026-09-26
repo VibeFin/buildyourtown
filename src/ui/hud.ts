@@ -835,15 +835,30 @@ export class Hud {
 
   private bindMinimap(): void {
     const box = this.minimap;
-    box.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
+    let scrubbing = false;
+    const go = (clientX: number, clientY: number) => {
       const r = this.minimap.getBoundingClientRect();
       const n = this.minimapSize || 1;
-      const px = ((e.clientX - r.left) / r.width) * n * 2, py = ((e.clientY - r.top) / r.height) * n;
+      const px = ((clientX - r.left) / r.width) * n * 2, py = ((clientY - r.top) / r.height) * n;
       // inverse of the iso projection above
       const x = (px - n + 2 * py) / 2, y = (2 * py - (px - n)) / 2;
       this.handlers.onMinimap(Math.max(0, Math.min(n - 1, x)), Math.max(0, Math.min(n - 1, y)));
+    };
+    box.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      scrubbing = true;
+      try { box.setPointerCapture(e.pointerId); } catch { /* no capture */ }
+      go(e.clientX, e.clientY);
     });
+    // a finger can scrub across the minimap: the camera follows until release
+    box.addEventListener('pointermove', (e) => {
+      if (!scrubbing) return;
+      e.preventDefault();
+      go(e.clientX, e.clientY);
+    });
+    const stop = () => { scrubbing = false; };
+    box.addEventListener('pointerup', stop);
+    box.addEventListener('pointercancel', stop);
   }
 
   update(city: City): void {
